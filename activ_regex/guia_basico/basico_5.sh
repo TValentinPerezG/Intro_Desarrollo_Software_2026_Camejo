@@ -1,0 +1,19 @@
+# Introducción - Básicos
+# Tenemos un archivo oraciones.txt, cuyo contenido es:
+
+# El perro corre rápido por el parque.
+# María compró manzanas, peras y bananas en el mercado.
+# La computadora tiene 16 GB de RAM y 512 GB de almacenamiento.
+# ¡Qué día tan bonito para un paseo por la montaña!
+# ¿Cuántas palabras puede contener esta oración?
+# El gato saltó sobre la mesa para atrapar el ratón.
+# Las clases de Intro comienzan a las 7:30 AM.
+# Juan y Martina juegan al fútbol todos los viernes.
+
+# Encontrar la expresión regular de Regex que devuelve:
+
+
+# 5. Las ocurrencias de la letra c al comienzo de la palabra.
+grep -Ei "\Wc" oraciones.txt
+#o
+grep -Ei "[^a-z]c" oraciones.txt
