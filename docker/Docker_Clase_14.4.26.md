@@ -133,4 +133,53 @@ _____
 ####  imagen:tag - El tag nos dice la version de la imagen.
 ####  las variantes alpine son imagenes minimas con menor tamaño.
 ####  Si quiero un docker con distintos programas especificos, tenemos que crear una imagen personalizada con la combinacion de los programas
+####  Si no usamos el :, se descarga la version mas nueva (latest)
 
+_____
+
+##  Docker CLI
+
+####  Docker Inc: La empresa que creo Docker y ofrece servicios
+####  Docker Engine: Herramienta gratuita
+####
+
+###  Creemos nuestro primer contenedor
+
+####  Comando basico de docker: docker run [opciones] imagen [command]
+####  cuando hacemos docker run, me queda agarrada la terminal al proceso
+- #####  docker run nginx
+####  no nos deja interactuar
+####  -d --> corre en segundo plano
+- #####  docker run -d nginx
+####  actualmente no puedo hacer nada con el sistema porque esta aislado si no
+####  -p 8080:80 --> mapeamos un puerto (8080) del host a un puerto (80) de nuestro contenedor
+####  --name web --> le da un nombre que yo le puse a un contenedor, para no tener que llamarlo por su ID en los comandos
+- #####  docker run -d -p 8080:80 --name web 
+####  descargamos y ejecutamos Nginx (nginx es un contenedor web)
+
+####  ahora, si ingreso al localhost:8080 a traves de la web, podria ver nginx desde el navegador
+
+##  Comandos Utiles de Docker
+
+- docker container ls, docker ps ---> nos deja ver una tabla con nuestros contenedores corriendo en el momento, con -a nos muestra detenidos
+- docker stop (contenedor) --> el contenedor sigue existiendo pero no esta corriendo en el momento
+- docker start (contenedor) --> inicia el contenedor
+- docker rm (contnedor) --> borra un contenedor si es que este esta detenido (si no esta detenido va a dar error)
+- docker rm -f (contenedor) --> fuerza a borrar un contenedor, incluso si esta corriendo
+- docker logs (contenedor) --> nos devuelve los logs que habia hasta ese momento en el sistema
+- docker logs -f (contenedor) --> te muestra los logs nuevos que se van generando
+- docker exec (contenedor) (comando) --> nos permite ejecutar un comando dentro de un contenedor
+- docker exec web ls --> hace un ls dentro del contenedor "web"
+- ddocker exec -it web bash --> nos deja abrir bash dentro de nuestro contenedor, con el -it es lo que hace nuestro comando interactivo y hace que lo reconozca.
+- docker pull python:3.12 --> nos descarga la imagen de la que dimos el nombre, en este caso descarga una version de python
+- docker images --> nos muestra la lista de imagenes descargadas
+- docker rmi (imagen):(tag) --> elimina la imagen
+- docker build -t myapp:1.0 --> construir una imagen nosotros mismos
+
+###  Como funciona si tengo un contenedor y una PC al azar quiere interactuar con este
+
+####  El equipo mandara una peticion a un puerto del servidor, en este caso al puerto :80, y este mismo puerto nos redigire al puerto :8080 de nuestro contenedor.
+####  Nuestro contenedor tiene un servicio escuchando el puerto 8080, para procesar lo que se recibio y despues regirigir la respuesta a la PC inicial.
+####  Como cada contenedor es unico, ambos servidores pueden estar escuchando el puerto 8080 del contenedor, pero no el mismo puerto en el host
+####  Osea, el segundo contenedor debe estar conectado a un puerto distinto del host, por ejemplo :81 en lugar de :80
+####  Ejemplo, 80:8080 y 81:8080 pueden convivir, porque son peticiones desde un puerto distintos del host a 2 contenedores distintos, pero 80:8081 y 80:8080 no, porque el primero es del host y en el host no puede llevarnos de una misma peticion a varios puertos
