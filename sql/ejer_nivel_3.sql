@@ -27,11 +27,16 @@ and not exists(
 
 -- Ejercicio 4: El concierto con más bandas participantes, mostrando el nombre del concierto y la cantidad de bandas que participaron.
 
-
+select c.nombre, count(*) as bandas_participantes from conciertos
+join conciertos_musicos cm on c.id = cm.concierto_id
+group by c.id
+order by bandas_participantes desc
+limit 1;
 
 -- Ejercicio 5: El nombre de los álbumes cuyas bandas fueron al menos a un concierto en el país "Argentina", ordenados por ranking de mejor a peor.
 
-
+select a.nombre from albumes
+join 
 
 -- Ejercicio 6: La cantidad de canciones que tiene cada banda, ordenadas de mayor a menor cantidad de canciones. Mostrar el nombre de la banda y la cantidad de canciones.
 
