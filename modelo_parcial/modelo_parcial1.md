@@ -84,3 +84,126 @@ piensa. ¿Crees que les serviría utilizar Docker en este proyecto? ¿Por qué?
 
 ### R: Si, Docker seria ideal para este proyecto. Docker permite crear contenedores temporales y aislados con versiones especificas de servicios como python o sql, evitando asi que se generen problemas a causa de diferencias de versiones. El tener todos computadoras Linux hace que el uso de docker sea mas sencillo ya que no es necesaria la instalacion de Docker Desktop, y se sigue recomendando incluso en estos sistemas porque siguen existiendo diferentes versiones de muchos programas incluso si el Linux es el mismo
 ### Ademas, el ser temporales permite que estos contenedores sean excelentes para el testeo del funcionamiento optimo de cualquier funcionalidad que se quiera integrar en el sistema.
+
+# Revision en clase de respuestas
+
+3. Pensando en el sistema que quieren construir, ¿qué tablas, campos y relaciones debería tener la base  
+de datos?  
+Explicá claramente:  
+- qué entidades principales existirían (por ejemplo: jugadores, partidos, etc.)  
+- qué relaciones hay entre ellas  
+- cuáles serían las claves foráneas (foreign keys) y para qué sirven  
+Se recomienda justificar todas las decisiones.  
+
+R: Al ser un grupo de amigos, considero que normalmente no ha equipos fijos  
+Por lo tanto, los jugadores van a ir mezclandose  
+
+### jugadores(id, nombre_completo, posicion_preferida, fecha_nacimiento, nacionalidad, dni)
+
+CREATE TABLE jugadores(  
+    id SERIAL PRIMARY KEY,  
+    nombre_completo VARCHAR(100) NOT NULL,  
+    posicion_preferida VARCHAR(50),  
+    fecha_nacimiento DATE,  
+    nacionalidad VARCHAR(50) DEFAULT "Argentina",  
+    dni INTEGER,  
+    email VARCHAR(255) UNIQUE NOT NULL,
+    clave VARCHR(255) NOT NULL
+);  
+
+### partidos (id, fecha_hora, lugar, goles_local, goles_visitante)
+
+CREATE TABLE partidos(  
+    id SERIAL PRIMARY KEY,  
+    fecha_hora TIMESTAMP NOT NULL,  
+    lugar VARCHAR(200) NOT NULL,  
+    goles_local SMALLINT NOT NULL,  
+    goles_visitante SMALLINT NOT NULL  
+
+);  
+En el caso de goles_* podria ser un tipo de dato que solo contemple numero >= 0  
+
+### jugadores_partido (id_jugador, id_partido, equipo(local|visitante))
+#### Si fuera solo de relacion, no seria una entidad porque solo seria un intermediario que relaciona a las otras 2, ahora, como tiene info especifica adentro, pasa a ser otra entidad mas
+
+CREATE TABLE jugadores_partidos(
+    id_jugador INT REFERENCES(jugadores) NOT NULL,
+    id_partidos INT REFERENCES(partidos) NOT NULL,
+    es_local BOOL NOT NULL,
+    goles_anotados SMALLINT NOT NULL DEFAULT 0,
+    asistencias SMALLINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (id_jugador, id_partido)
+);
+
+### inscripciones (id_partido, id_jugador, fecha_inscripcion)
+
+CREATE TABLE inscripciones(
+    id_jugador INT REFERENCES(jugadores),
+    id_partido INT REFERENCES(partido),
+    fecha_inscripcion TIMESTAMP NOT NULL
+    PRIMARY KEY (id_jugador, id_partido)
+);
+
+- Tendriamos una tabla para los jugadores,la cual contrendria campos como un id autoincremental, el nombre del jugador, su email y contraseña para el sistema de registro como not null, y su edad, fecha de nacimiento y posicion preferida
+- Tambien tendriamos una tabla con los partidos, donde tendriamos un id autoincremental, la fecha y hora donde tomo lugar, cuantos goles hicieron cada uno de los equipos, que distinguimos con local y visitante, o la direccion. Esta tabla nos da los datos del partido para el aspecto de registro que se menciono
+- Tendriamos una tabla de inscripciones, la cual contiene una FK hacia un jugador y una FK hacia un partido, siendo la combinacion de estas 2 la Primary Key, donde vemos la fecha en la que se inscribio. En esta representa una relacion M:M entre los jugadores y los partidos, y es la que les permitira a los jugadores anotarse a los partidos a traves de la web.
+- Finalmente, tendremos una tabla jugadores_partidos, que utiliza las mismas FK de la tabla inscripciones, y nos dara informacion especifica de cada jugador en el partido jugado, como los goles que hizo, en que equipo jugo, y sus asistencias. Su primary key tambien es la tupla de las Foreing Key.
+
+Las entidades principales son los jugadores y los partidos  
+Las relaciones que tenemos son desde jugadores_partidos e inscripciones hacia la tabla de jugadores y la tabla de partidos. Las FK sirven para referencias las primary key de otras tablas, relacionando a ambas  
+
+4. Escribí una sentencia de SQL que muestre información de (al menos) 2 tablas, y esté ordenada.
+Explicá en un párrafo qué es lo que se supone que la sentencia muestra.
+
+Goles hechos por partido (fecha) por cada jugador (nombre completo)
+
+SELECT j.nombre_completo, p.fecha_hora, jp.goles_anotados FROM jugadores_partidos jp
+JOIN jugadores j ON j.id = jp.id_jugador
+JOIN partidos p ON p.id = jp.id_partidos
+ORDER BY p.fecha_hora DESC, jp.goles_anotados DESC, j.nombre_completo;
+
+Esta sentencia busca en 3 tablas distintas los datos del nombre del jugador, la fecha del partido, y la cantidad de goles anotados por ese jugador en ese partido
+
+Se muestra para cada partido, su fehca y la cantidad de goles anotados por cada jugador, con el nombre de este mismo. Ordenada primero por fecha del partido de mas viejo a mas reciente, y dentro de este orden se ordena por goles anotados, de mas goles a menos, y si hay empate en esto, se muestra en orden alfabetico segun el nombre del jugador.
+
+5. Respecto a la Ingeniería de Software ¿Qué etapas de la ingeniería de software se aplicaron hasta ahora?
+
+
+
+6. Tomás leyó por ahí “Docker”, pero no entiende bien si le sirve o no “Los 3 tenemos compus con Linux”
+piensa. ¿Crees que les serviría utilizar Docker en este proyecto? ¿Por qué?
+
+### Por mas que tengamos el mismo sistema operativo, no significa que tengamos las mismas versiones de dependencias, y mas con linux ya que estas tienen muchas versiones con distintas dependencias y distintas versiones de estas mismas.
+### Incluso con los beneficios de hacer un contenedor que sirven para trabajo individual, como el manternos consistentes con nuestras dependencias, y los testeos aislados de los elementos de nuestro sistema, el mejor componente es poner facilitar el trabajo grupal en el proyecto al trabajar todos con las mismas dependencias, mismas configuraciones, mismos puertos, mismas versiones, y en general nos aseguramos de que se va a comportar de la misma manera para los demas que en nuestro desarrollo local, evitando sorpresas indeseables en cuanto a problemas en el servidor o con el equipo.
+### Utiliza el kernel y los nucleos de mi computadora, 
+
+1. Lucas y Martín deciden que el lenguaje para hacer el sistema sea Bash, pero Tomás no está
+convencido. ¿Creés que Bash es una buena opción para desarrollar una aplicación web como la
+descripta? Justificá tu respuesta.
+
+### Haciendo muchos malabares se podria conseguir que bash haga este sitio web, pero hay otras herramientas como javascript o python que estan pensadas para este tipo de sistemas web, por lo que bash, que se centra en automatizacion, scripts cortos, no para trabajar un servidor web al tener una naturaleza mas corta y menos teniendo disponibles herramientas mucho mas optimizadas para este trabajo.
+
+2. Tomás propone utilizar GitHub para el desarrollo del proyecto.
+¿Qué es GitHub y en qué aspectos creés que beneficiaría al equipo utilizarlo?
+
+### GitHub es una plataforma para hostear repositorios de git, permitiendo trabajar las cualidades de git, como seria el mantener el registro de versiones y trabajar con versiones activas, las branches para que cada miembro trabaje en aspectos sin pisar el trabajo de sus compañeros, y siendo el aspecto mas beneficioso que permite tener estos en la nube, haciendo que estos cambios esten disponibles para todos los miembros en todo momento, y permitiendo hacer cosas como pull request para que todo los miembros puedan ver estos cambios y denotar problemas o cambios necesarios en estos.
+
+## ejercicio extra:
+
+Tomas recolectó un montón de equipos que podrían usar el sistema y los guardó en un archivo csv.  
+El formato del archivo es   
+NombreEquipo;PartidosPorSemana;TeléfonoContacto;MailContacto  
+Quieren arrancar contactando a quienes jueguen 1 vez por semana y el Mail sea un gmail.  
+
+Escribir una expresión regular que liste los equipos a contactar  
+
+### R:
+### ^[^;]+;1;[^;]+;[^@]+(@gmail\.com)$
+comienza la linea (^)  
+busca caracteres distintos a ; 1 o mas veces ([^;]+)  
+busca ;1; (;1;)  
+busca caracteres distintos a ; 1 o mas veces ([^;]+)  
+busca ; (;)  
+busca caracteres distintos a @ 1 o mas veces ([^@]+)  
+busca exactamente @gmail.com, con una \ antes del . para que busque el caracter y no el uso de . de que sea cualquier caracter (@gmail\.com)  
+esto ultimo tiene que ser al final de la linea ($)  
